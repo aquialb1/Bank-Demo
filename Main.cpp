@@ -2,28 +2,38 @@
 
 using namespace std;
 
-string username = "MercuryBank";
-string password = "12345";
-
-string username_input;
-string password_input;
-
 int main()
 {
-    cout << "Welcome to Mercury Bank! Please log in using your username and password." << endl;
+    string selection;
+
+    cout << "- Mercury Bank -" << endl;
     cout << endl;
 
-    cout << "Username: ";
-    cin >> username_input;
+    do {
+        cout << "1 - Returning User  |  2 - New User  |  3 - Exit" << endl;
+        cout << endl;
+        cout << "Please select an option from the menu above and press enter: ";
+        cin >> selection;
+        cout << endl;
 
-    cout << "Password: ";
-    cin >> password_input;
+        if (selection == "1") {
+            cout << "Returning" << endl;
+            cout << endl;
+        }
+        else if (selection == "2") {
+            cout << "New" << endl;
+            cout << endl;
+        }
+        else if (selection == "3") {
+            cout << "";
+        }
+        else {
+            cout << "Invalid selection. Please try again." << endl;
+            cout << endl;
+        }
+
+    } while (selection != "3");
+
     cout << endl;
-
-    if (username_input == username && password_input == password) {
-        cout << "Yes";
-    }
-    else {
-        cout << "No";
-    }
+    return 0;
 }
