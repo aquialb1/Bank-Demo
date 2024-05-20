@@ -1,4 +1,7 @@
 #include <iostream>
+#include <string>
+#include <list>
+#include "Header.h"
 
 using namespace std;
 
@@ -10,21 +13,18 @@ int main()
     cout << endl;
 
     do {
-        cout << "1 - Returning User  |  2 - New User  |  3 - Exit" << endl;
+        cout << "Please select an option from the menu below." << endl;
         cout << endl;
-        cout << "Please select an option from the menu above and press enter: ";
+        cout << "1 - Log In  |  2 - Exit" << endl;
+        cout << endl;
         cin >> selection;
         cout << endl;
 
         if (selection == "1") {
-            cout << "Returning" << endl;
+            returning_user();
             cout << endl;
         }
         else if (selection == "2") {
-            cout << "New" << endl;
-            cout << endl;
-        }
-        else if (selection == "3") {
             cout << "";
         }
         else {
@@ -32,7 +32,7 @@ int main()
             cout << endl;
         }
 
-    } while (selection != "3");
+    } while (selection != "2");
 
     cout << endl;
     return 0;
