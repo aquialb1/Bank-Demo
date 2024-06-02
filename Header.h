@@ -7,7 +7,7 @@ using namespace std;
 
 class Account {
 public:
-	string username = "User";
+	string username = "Username";
 	string password = "12345";
 
 	string name = "User";
@@ -17,25 +17,58 @@ public:
 
 	string savings = "Mercury Savings: $";
 	float savings_value = 0;
-
 };
 
-void account_options() {
-	string selection;
-	
-	cout << "1 - Deposit  |  2 - Withdraw  |  3 - Transfer" << endl;
+void deposit() {
+	Account user_account;
+	float deposit_amount;
+
+	cout << "Enter the amount you would like to deposit: " << endl;
+	cin >> deposit_amount;
+
+	if (deposit_amount > 0) {
+		cout << user_account.checking_value + deposit_amount << endl;
+	}
+	else {
+		cout << "Invalid amount. Please try again." << endl << endl;
+		deposit();
+	}
+}
+
+void withdraw() {
+	Account user_account;
+	float withdraw_amount;
+
 }
 
 void account_entry() {
 	Account user_account;
+	string selection;
 
-	cout << "--------------------" << endl;
-	cout << endl;
-	cout << "Welcome, " << user_account.name << endl;
-	cout << endl;
+	cout << "--------------------" << endl << endl;
+	cout << "Welcome, " << user_account.name << endl << endl;
 
 	cout << user_account.checking << user_account.checking_value << endl;
-	cout << user_account.savings << user_account.savings_value << endl;
+	cout << user_account.savings << user_account.savings_value << endl << endl;
+
+	cout << "1 - Deposit  |  2 - Withdraw  |  3 - Logout" << endl << endl;
+	cout << "Selection: ";
+	cin >> selection;
+	cout << endl;
+
+	if (selection == "1") {
+		deposit();
+	}
+	else if (selection == "2") {
+		cout << "Withdraw";
+	}
+	else if (selection == "3") {
+		exit(0);
+	}
+	else {
+		cout << "Invalid selection. Please try again." << endl << endl;
+		account_entry();
+	}
 }
 
 void returning_user() {
@@ -44,12 +77,12 @@ void returning_user() {
 	string username_input;
 	string password_input;
 
-	cout << "Returning User" << endl;
-	cout << endl;
+	cout << "--------------------" << endl << endl;
+	cout << "Returning User" << endl << endl;
 
 	cout << "Username: ";
 	cin >> username_input;
-	
+
 	cout << "Password: ";
 	cin >> password_input;
 	cout << endl;
@@ -58,8 +91,7 @@ void returning_user() {
 		account_entry();
 	}
 	else {
-		cout << "Invalid username or password. Please try again." << endl;
-		cout << endl;
+		cout << "Invalid username or password. Please try again." << endl << endl;
 		returning_user();
 	}
 }
