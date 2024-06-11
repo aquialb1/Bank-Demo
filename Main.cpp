@@ -19,19 +19,7 @@ void deposit() {
 	cout << endl;
 
 	if (selection == "1") {
-		cout << "Checking Deposit" << endl << endl;
-		cout << "Enter the amount you'd like to deposit: ";
-		cin >> deposit_amount;
-		cout << endl;
-
-		if (deposit_amount > 0) {
-			user_account.checking_value += deposit_amount;
-			account_entry();
-		}
-		else {
-			cout << "No" << endl << endl;
-			deposit();
-		}
+		cout << "Deposit";
 	}
 	else if (selection == "2") {
 		cout << "Savings" << endl << endl;
@@ -44,7 +32,6 @@ void deposit() {
 void withdraw() {
 	Account user_account;
 	float withdraw_amount;
-
 }
 
 void account_entry() {
@@ -57,7 +44,7 @@ void account_entry() {
 	cout << user_account.checking << user_account.checking_value << endl;
 	cout << user_account.savings << user_account.savings_value << endl << endl;
 
-	cout << "1 - Deposit  |  2 - Withdraw  |  3 - Logout" << endl << endl;
+	cout << "1 - Deposit  |  2 - Withdraw  |  3 - Back" << endl << endl;
 	cout << "Selection: ";
 	cin >> selection;
 	cout << endl;
@@ -108,23 +95,25 @@ int main()
 
     cout << "- Mercury Bank -" << endl << endl;
 
-    cout << "Please select an option from the menu below." << endl << endl;
-    cout << "1 - Log In  |  2 - Exit" << endl << endl;
-    cout << "Selection: ";
-    cin >> selection;
-    cout << endl;
+	do {
+		cout << "Please select an option from the menue below." << endl << endl;
+		cout << "1 - Log In  |  2 - Logout" << endl << endl;
+		cout << "Selection: ";
+		cin >> selection;
+		cout << endl;
 
-    if (selection == "1") {
-        returning_user();
-        cout << endl;
-    }
-    else if (selection == "2") {
-        exit(0);
-    }
-    else {
-        cout << "Invalid selection. Please try again." << endl << endl;
-        main();
-    }
+		if (selection == "1") {
+			returning_user();
+			cout << endl;
+		}
+		else if (selection == "2") {
+			exit(0);
+		}
+		else {
+			cout << "Invalid selection. Please try again." << endl << endl;
+			main();
+		}
+	} while (selection != "2");
 
     cout << endl;
     return 0;
