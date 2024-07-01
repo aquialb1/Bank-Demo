@@ -14,7 +14,8 @@ public:
 
 	string checking = "Checking: $";
 	float checking_value = 0;
-
-	string savings = "Savings: $";
-	float savings_value = 0;
 };
+
+int main();
+
+void account_entry();

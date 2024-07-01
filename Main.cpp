@@ -5,28 +5,23 @@
 
 using namespace std;
 
-int main();
-
-void account_entry();
+Account user_account;
 
 void deposit() {
-	Account user_account;
-	string selection;
 	float deposit_amount;
 
-	cout << "Which account would like to deposit into?: 1 - Checking  |  2 - Savings";
-	cin >> selection;
+	cout << "Please enter an amount you would like to deposit: ";
+	cin >> deposit_amount;
 	cout << endl;
 
-	if (selection == "1") {
-		cout << "Deposit";
-	}
-	else if (selection == "2") {
-		cout << "Savings" << endl << endl;
-	}
-	else {
-		cout << "Invalid" << endl << endl;
-	}
+	do {
+		if (deposit_amount > 0) {
+			user_account.checking_value = deposit_amount;
+		}
+		else {
+			cout << "Amount invalid. Please try again.";
+		}
+	} while (deposit_amount < 0);
 }
 
 void withdraw() {
@@ -34,25 +29,28 @@ void withdraw() {
 	float withdraw_amount;
 }
 
+void controller(string route) {
+	if (route == "deposit") {
+		deposit();
+	}
+}
+
 void account_entry() {
-	Account user_account;
 	string selection;
 
 	cout << "--------------------" << endl << endl;
 	cout << "Welcome, " << user_account.name << endl << endl;
 
 	cout << user_account.checking << user_account.checking_value << endl;
-	cout << user_account.savings << user_account.savings_value << endl << endl;
 
 	do {
-		cout << "1 - Deposit  |  2 - Withdraw  |  3 - Back" << endl << endl;
+		cout << "1 - Deposit  |  2 - Withdraw  |  3 - Menu" << endl << endl;
 		cout << "Selection: ";
 		cin >> selection;
 		cout << endl;
 
 		if (selection == "1") {
-			// deposit();
-			cout << "Deposit" << endl;
+			deposit();
 		}
 		else if (selection == "2") {
 			cout << "Withdraw" << endl;
