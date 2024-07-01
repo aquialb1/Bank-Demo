@@ -10,23 +10,39 @@ Account user_account;
 void deposit() {
 	float deposit_amount;
 
+	cout << "--------------------" << endl << endl;
 	cout << "Please enter an amount you would like to deposit: ";
 	cin >> deposit_amount;
 	cout << endl;
 
 	do {
 		if (deposit_amount > 0) {
-			user_account.checking_value = deposit_amount;
+			user_account.checking_value += deposit_amount;
+			account_entry();
 		}
 		else {
-			cout << "Amount invalid. Please try again.";
+			cout << "Amount invalid. Please try again." << endl << endl;
 		}
-	} while (deposit_amount < 0);
+	} while (deposit_amount != 0);
 }
 
 void withdraw() {
-	Account user_account;
 	float withdraw_amount;
+
+	cout << "--------------------" << endl << endl;
+	cout << "Please enter an amount you would like to withdraw: ";
+	cin >> withdraw_amount;
+	cout << endl;
+
+	do {
+		if (withdraw_amount > 0) {
+			user_account.checking_value -= withdraw_amount;
+			account_entry();
+		}
+		else {
+			cout << "Amount invalid. Please try again." << endl << endl;
+		}
+	} while (withdraw_amount != 0);
 }
 
 void controller(string route) {
@@ -53,7 +69,7 @@ void account_entry() {
 			deposit();
 		}
 		else if (selection == "2") {
-			cout << "Withdraw" << endl;
+			withdraw();
 		}
 		else if (selection == "3") {
 			main();
