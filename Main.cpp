@@ -1,11 +1,13 @@
 #include <iostream>
 #include <string>
 #include <list>
+#include <fstream>
 #include "Header.h"
 
 using namespace std;
 
 Account user_account;
+ofstream user_list("user_list.txt");
 
 void deposit() {
 	float deposit_amount;
@@ -15,15 +17,13 @@ void deposit() {
 	cin >> deposit_amount;
 	cout << endl;
 
-	do {
-		if (deposit_amount > 0) {
-			user_account.checking_value += deposit_amount;
-			account_entry();
-		}
-		else {
-			cout << "Amount invalid. Please try again." << endl << endl;
-		}
-	} while (deposit_amount != 0);
+	if (deposit_amount > 0) {
+		user_account.checking_value += deposit_amount;
+		// account_entry();
+	}
+	else {
+		cout << "Invalid amount. Please try again." << endl << endl;
+	}
 }
 
 void withdraw() {
@@ -34,37 +34,42 @@ void withdraw() {
 	cin >> withdraw_amount;
 	cout << endl;
 
-	do {
-		if (withdraw_amount > 0) {
-			user_account.checking_value -= withdraw_amount;
-			account_entry();
-		}
-		else {
-			cout << "Amount invalid. Please try again." << endl << endl;
-		}
-	} while (withdraw_amount != 0);
+	if (withdraw_amount > 0) {
+		user_account.checking_value -= withdraw_amount;
+		// account_entry();
+	}
+	else {
+		cout << "Amount invalid. Please try again." << endl << endl;
+	}
 }
 
-void controller(string route) {
+void controller1(string route) {
 	if (route == "deposit") {
 		deposit();
+	}
+	else if (route == "withdraw") {
+		withdraw();
 	}
 }
 
 void account_entry() {
 	string selection;
 
-	cout << "--------------------" << endl << endl;
-	cout << "Welcome, " << user_account.name << endl << endl;
-
-	cout << user_account.checking << user_account.checking_value << endl;
-
 	do {
-		cout << "1 - Deposit  |  2 - Withdraw  |  3 - Menu" << endl << endl;
+		// check if user is logged in
+		// if not, call returning_user()
+		// if so, call account_entry()
+		cout << "--------------------" << endl << endl;
+		cout << "Welcome, " << user_account.name << endl << endl;
+
+		cout << user_account.checking << user_account.checking_value << endl << endl;
+
+		cout << "1 - Deposit  |  2 - Withdraw  |  3 - Login/Logout" << endl << endl;
 		cout << "Selection: ";
 		cin >> selection;
 		cout << endl;
 
+		// return selection to controller(); remove 76-81
 		if (selection == "1") {
 			deposit();
 		}
@@ -106,15 +111,23 @@ void returning_user() {
 	} while (username_input != user_account.username && password_input != user_account.password);
 }
 
+void account_creation() {
+	string username_create;
+	string password_create;
+
+
+}
+
 int main()
 {
     string selection;
 
     cout << "- Mercury Bank -" << endl << endl;
+	user_list << "Hello" << endl << endl;
 
 	do {
 		cout << "Please select an option from the menue below." << endl << endl;
-		cout << "1 - Log In  |  2 - Logout" << endl << endl;
+		cout << "1 - Log In  |  2 - Create an Account  |  3 - Exit" << endl << endl;
 		cout << "Selection: ";
 		cin >> selection;
 		cout << endl;
@@ -124,12 +137,16 @@ int main()
 			cout << endl;
 		}
 		else if (selection == "2") {
+
+		}
+		else if (selection == "3") {
+			user_list.close();
 			exit(0);
 		}
 		else {
 			cout << "Invalid selection. Please try again." << endl << endl;
 		}
-	} while (selection != "2");
+	} while (selection != "3");
 
     cout << endl;
     return 0;
