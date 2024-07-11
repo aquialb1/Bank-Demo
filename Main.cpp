@@ -7,7 +7,7 @@
 using namespace std;
 
 Account user_account;
-ofstream user_list("user_list.txt");
+fstream user_list;
 
 void deposit() {
 	float deposit_amount;
@@ -40,15 +40,6 @@ void withdraw() {
 	}
 	else {
 		cout << "Amount invalid. Please try again." << endl << endl;
-	}
-}
-
-void controller1(string route) {
-	if (route == "deposit") {
-		deposit();
-	}
-	else if (route == "withdraw") {
-		withdraw();
 	}
 }
 
@@ -112,9 +103,32 @@ void returning_user() {
 }
 
 void account_creation() {
+	user_list.open("user_list.txt", ios::app);
+	
+	string name_create;
 	string username_create;
 	string password_create;
 
+	cout << "--------------------" << endl << endl;
+	cout << "New User" << endl << endl;
+	cout << "Please create your username and password in the fields below." << endl << endl;
+
+	// cout << "First Name: ";
+	// cin >> name_create;
+
+	cout << "Username: ";
+	cin >> username_create;
+
+	cout << "Password: ";
+	cin >> password_create;
+	cout << endl;
+
+	string users[100] = { username_create, password_create };
+
+	user_list << username_create;
+	user_list << password_create;
+
+	user_list.close();
 
 }
 
@@ -123,10 +137,9 @@ int main()
     string selection;
 
     cout << "- Mercury Bank -" << endl << endl;
-	user_list << "Hello" << endl << endl;
 
 	do {
-		cout << "Please select an option from the menue below." << endl << endl;
+		cout << "Please select an option from the menu below." << endl << endl;
 		cout << "1 - Log In  |  2 - Create an Account  |  3 - Exit" << endl << endl;
 		cout << "Selection: ";
 		cin >> selection;
@@ -137,10 +150,11 @@ int main()
 			cout << endl;
 		}
 		else if (selection == "2") {
-
+			account_creation();
+			cout << endl;
 		}
 		else if (selection == "3") {
-			user_list.close();
+			// user_list.close();
 			exit(0);
 		}
 		else {
