@@ -1,6 +1,5 @@
 #include <iostream>
 #include <string>
-#include <list>
 #include <fstream>
 #include "Header.h"
 
@@ -60,7 +59,6 @@ void account_entry() {
 		cin >> selection;
 		cout << endl;
 
-		// return selection to controller(); remove 76-81
 		if (selection == "1") {
 			deposit();
 		}
@@ -78,6 +76,8 @@ void account_entry() {
 
 void returning_user() {
 	Account user_account;
+	user_list.open("user_list.txt");
+	string line;
 
 	string username_input;
 	string password_input;
@@ -85,26 +85,19 @@ void returning_user() {
 	cout << "--------------------" << endl << endl;
 	cout << "Returning User" << endl << endl;
 
-	do {
-		cout << "Username: ";
-		cin >> username_input;
+	cout << "Username: ";
+	cin >> username_input;
 
-		cout << "Password: ";
-		cin >> password_input;
-		cout << endl;
+	cout << "Password: ";
+	cin >> password_input;
+	cout << endl;
 
-		if (username_input == user_account.username && password_input == user_account.password) {
-			account_entry();
-		}
-		else {
-			cout << "The entered username or password is incorrect. Please try again." << endl << endl;
-		}
-	} while (username_input != user_account.username && password_input != user_account.password);
+	user_list.close();
 }
 
 void account_creation() {
 	user_list.open("user_list.txt", ios::app);
-	
+
 	string name_create;
 	string username_create;
 	string password_create;
@@ -123,13 +116,30 @@ void account_creation() {
 	cin >> password_create;
 	cout << endl;
 
-	string users[100] = { username_create, password_create };
+	string user_info[4] = { username_create, " ", password_create, "\n" };
 
-	user_list << username_create;
-	user_list << password_create;
+	for (int i = 0; i < 4; i++) {
+		user_list << user_info[i];
+	}
+	
+	//user_list << user_info[0] << endl;
+	//user_list << user_info[1] << endl;
 
 	user_list.close();
+}
 
+void demo() {
+	user_list.open("user_list.txt");
+	string text;
+
+	//while (getline(user_list, text)) {
+	//	cout << text;
+	//}
+
+	user_list.seekg(1, fstream::beg);
+	cout << user_list.tellg();
+
+	user_list.close();
 }
 
 int main()
@@ -147,6 +157,7 @@ int main()
 
 		if (selection == "1") {
 			returning_user();
+			//demo();
 			cout << endl;
 		}
 		else if (selection == "2") {
@@ -154,7 +165,6 @@ int main()
 			cout << endl;
 		}
 		else if (selection == "3") {
-			// user_list.close();
 			exit(0);
 		}
 		else {
