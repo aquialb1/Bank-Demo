@@ -6,10 +6,9 @@ using namespace std;
 
 class Account {
 public:
+	string name = "User";
 	string username = "username";
 	string password = "12345";
-
-	string name = "User";
 
 	string checking = "Checking: $";
 	float checking_value = 0;

@@ -5,9 +5,6 @@
 
 using namespace std;
 
-Account user_account;
-//fstream user_list;
-
 void deposit() {
 	float deposit_amount;
 
@@ -75,8 +72,6 @@ void account_entry() {
 }
 
 void login() {
-	Account user_account;
-
 	string username_input, password_input, username_file, password_file;
 
 	cout << "--------------------" << endl << endl;
@@ -93,16 +88,23 @@ void login() {
 	bool isloggedin = false;
 
 	if (user_list.is_open()) {
-		while (user_list >> username_file >> password_file) {
+		//while (user_list >> username_file >> password_file) {
+		//	if (username_file == username_input && password_file == password_input) {
+		//		isloggedin = true;
+		//		break;
+		//	}
+		//}
+		while (getline(user_list, username_file, ',') && getline(user_list, password_file, ',')) {
 			if (username_file == username_input && password_file == password_input) {
 				isloggedin = true;
 				break;
 			}
 		}
+
 		user_list.close();
 
 		if (isloggedin) {
-			cout << "Login succesful." << endl;
+			cout << "Login successful." << endl;
 		}
 		else {
 			cout << "Invalid username or password. Please try again." << endl;
@@ -112,6 +114,7 @@ void login() {
 
 void create_account() {
 	string name_create, username_create, password_create;
+	float starting_balance = 0;
 
 	cout << "--------------------" << endl << endl;
 	cout << "New User" << endl << endl;
@@ -127,21 +130,14 @@ void create_account() {
 	cin >> password_create;
 	cout << endl;
 
-	//user_list.open("user_list.txt", ios::app);
 	ofstream user_list("user_list.txt", ios::app);
 	if (user_list.is_open()) {
-		user_list << username_create << " " << password_create << endl;
+		user_list << username_create << "," << password_create << endl;
 		user_list.close();
 	}
 	else {
 		cout << "Unable to Create account." << endl;
 	}
-
-	//string user_info[4] = { username_create, " ", password_create, "\n"};
-
-	//for (int i = 0; i < 4; i++) {
-	//	user_list << user_info[i];
-	//}
 }
 
 int main() {
