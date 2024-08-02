@@ -1,1 +1,5 @@
 
+username password
+hello goodbye
+yes no
+who what

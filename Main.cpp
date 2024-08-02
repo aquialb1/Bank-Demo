@@ -6,7 +6,7 @@
 using namespace std;
 
 Account user_account;
-fstream user_list;
+//fstream user_list;
 
 void deposit() {
 	float deposit_amount;
@@ -74,13 +74,10 @@ void account_entry() {
 	} while (selection != "3");
 }
 
-void returning_user() {
+void login() {
 	Account user_account;
-	user_list.open("user_list.txt");
-	string line;
 
-	string username_input;
-	string password_input;
+	string username_input, password_input, username_file, password_file;
 
 	cout << "--------------------" << endl << endl;
 	cout << "Returning User" << endl << endl;
@@ -92,15 +89,29 @@ void returning_user() {
 	cin >> password_input;
 	cout << endl;
 
-	user_list.close();
+	ifstream user_list("user_list.txt");
+	bool isloggedin = false;
+
+	if (user_list.is_open()) {
+		while (user_list >> username_file >> password_file) {
+			if (username_file == username_input && password_file == password_input) {
+				isloggedin = true;
+				break;
+			}
+		}
+		user_list.close();
+
+		if (isloggedin) {
+			cout << "Login succesful." << endl;
+		}
+		else {
+			cout << "Invalid username or password. Please try again." << endl;
+		}
+	}
 }
 
-void account_creation() {
-	user_list.open("user_list.txt", ios::app);
-
-	string name_create;
-	string username_create;
-	string password_create;
+void create_account() {
+	string name_create, username_create, password_create;
 
 	cout << "--------------------" << endl << endl;
 	cout << "New User" << endl << endl;
@@ -116,34 +127,24 @@ void account_creation() {
 	cin >> password_create;
 	cout << endl;
 
-	string user_info[4] = { username_create, " ", password_create, "\n" };
-
-	for (int i = 0; i < 4; i++) {
-		user_list << user_info[i];
+	//user_list.open("user_list.txt", ios::app);
+	ofstream user_list("user_list.txt", ios::app);
+	if (user_list.is_open()) {
+		user_list << username_create << " " << password_create << endl;
+		user_list.close();
 	}
-	
-	//user_list << user_info[0] << endl;
-	//user_list << user_info[1] << endl;
+	else {
+		cout << "Unable to Create account." << endl;
+	}
 
-	user_list.close();
-}
+	//string user_info[4] = { username_create, " ", password_create, "\n"};
 
-void demo() {
-	user_list.open("user_list.txt");
-	string text;
-
-	//while (getline(user_list, text)) {
-	//	cout << text;
+	//for (int i = 0; i < 4; i++) {
+	//	user_list << user_info[i];
 	//}
-
-	user_list.seekg(1, fstream::beg);
-	cout << user_list.tellg();
-
-	user_list.close();
 }
 
-int main()
-{
+int main() {
     string selection;
 
     cout << "- Mercury Bank -" << endl << endl;
@@ -156,12 +157,11 @@ int main()
 		cout << endl;
 
 		if (selection == "1") {
-			returning_user();
-			//demo();
+			login();
 			cout << endl;
 		}
 		else if (selection == "2") {
-			account_creation();
+			create_account();
 			cout << endl;
 		}
 		else if (selection == "3") {
