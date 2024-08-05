@@ -14,8 +14,8 @@ void deposit() {
 	cout << endl;
 
 	if (deposit_amount > 0) {
-		user_account.checking_value += deposit_amount;
-		// account_entry();
+		//user_account.checking_value += deposit_amount;
+		//account_entry();
 	}
 	else {
 		cout << "Invalid amount. Please try again." << endl << endl;
@@ -31,8 +31,8 @@ void withdraw() {
 	cout << endl;
 
 	if (withdraw_amount > 0) {
-		user_account.checking_value -= withdraw_amount;
-		// account_entry();
+		//user_account.checking_value -= withdraw_amount;
+		//account_entry();
 	}
 	else {
 		cout << "Amount invalid. Please try again." << endl << endl;
@@ -47,9 +47,9 @@ void account_entry() {
 		// if not, call returning_user()
 		// if so, call account_entry()
 		cout << "--------------------" << endl << endl;
-		cout << "Welcome, " << user_account.name << endl << endl;
+		//cout << "Welcome, " << user_account.name << endl << endl;
 
-		cout << user_account.checking << user_account.checking_value << endl << endl;
+		//cout << user_account.checking << user_account.checking_value << endl << endl;
 
 		cout << "1 - Deposit  |  2 - Withdraw  |  3 - Login/Logout" << endl << endl;
 		cout << "Selection: ";
@@ -72,7 +72,10 @@ void account_entry() {
 }
 
 void login() {
-	string username_input, password_input, username_file, password_file;
+	string username_input;
+	string password_input;
+	string username_file;
+	string password_file;
 
 	cout << "--------------------" << endl << endl;
 	cout << "Returning User" << endl << endl;
@@ -94,7 +97,7 @@ void login() {
 		//		break;
 		//	}
 		//}
-		while (getline(user_list, username_file, ',') && getline(user_list, password_file, ',')) {
+		while (getline(user_list, username_file, ',') && getline(user_list, password_file, '\n')) {
 			if (username_file == username_input && password_file == password_input) {
 				isloggedin = true;
 				break;
@@ -113,15 +116,17 @@ void login() {
 }
 
 void create_account() {
-	string name_create, username_create, password_create;
+	string name_create;
+	string username_create;
+	string password_create;
 	float starting_balance = 0;
 
 	cout << "--------------------" << endl << endl;
 	cout << "New User" << endl << endl;
 	cout << "Please create your username and password in the fields below." << endl << endl;
 
-	// cout << "First Name: ";
-	// cin >> name_create;
+	cout << "First Name: ";
+	cin >> name_create;
 
 	cout << "Username: ";
 	cin >> username_create;
@@ -132,7 +137,7 @@ void create_account() {
 
 	ofstream user_list("user_list.txt", ios::app);
 	if (user_list.is_open()) {
-		user_list << username_create << "," << password_create << endl;
+		user_list << name_create << "," << username_create << "," << password_create << endl;
 		user_list.close();
 	}
 	else {
