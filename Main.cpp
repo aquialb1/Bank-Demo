@@ -39,7 +39,7 @@ void withdraw() {
 	}
 }
 
-void account_entry() {
+void account_entry(string name) {
 	string selection;
 
 	do {
@@ -47,7 +47,7 @@ void account_entry() {
 		// if not, call returning_user()
 		// if so, call account_entry()
 		cout << "--------------------" << endl << endl;
-		//cout << "Welcome, " << user_account.name << endl << endl;
+		cout << "Welcome, " << name << endl << endl;
 
 		//cout << user_account.checking << user_account.checking_value << endl << endl;
 
@@ -74,11 +74,12 @@ void account_entry() {
 void login() {
 	string username_input;
 	string password_input;
+	string name_file;
 	string username_file;
 	string password_file;
 
 	cout << "--------------------" << endl << endl;
-	cout << "Returning User" << endl << endl;
+	cout << "RETURNING USER" << endl << endl;
 
 	cout << "Username: ";
 	cin >> username_input;
@@ -91,26 +92,22 @@ void login() {
 	bool isloggedin = false;
 
 	if (user_list.is_open()) {
-		//while (user_list >> username_file >> password_file) {
-		//	if (username_file == username_input && password_file == password_input) {
-		//		isloggedin = true;
-		//		break;
-		//	}
-		//}
-		while (getline(user_list, username_file, ',') && getline(user_list, password_file, '\n')) {
+		while (getline(user_list, name_file, ',') && getline(user_list, username_file, ',') && getline(user_list, password_file, '\n')) {
 			if (username_file == username_input && password_file == password_input) {
 				isloggedin = true;
 				break;
 			}
 		}
-
 		user_list.close();
 
 		if (isloggedin) {
-			cout << "Login successful." << endl;
+			cout << "Login successful." << endl << endl;
+
+			account_entry(name_file);
 		}
 		else {
-			cout << "Invalid username or password. Please try again." << endl;
+			cout << "Invalid username or password. Please try again." << endl << endl;
+			login();
 		}
 	}
 }
@@ -122,8 +119,7 @@ void create_account() {
 	float starting_balance = 0;
 
 	cout << "--------------------" << endl << endl;
-	cout << "New User" << endl << endl;
-	cout << "Please create your username and password in the fields below." << endl << endl;
+	cout << "NEW USER" << endl << endl;
 
 	cout << "First Name: ";
 	cin >> name_create;
@@ -148,7 +144,7 @@ void create_account() {
 int main() {
     string selection;
 
-    cout << "- Mercury Bank -" << endl << endl;
+    cout << "- MERCURY BANK -" << endl << endl;
 
 	do {
 		cout << "Please select an option from the menu below." << endl << endl;
