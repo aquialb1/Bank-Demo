@@ -15,4 +15,4 @@ public:
 
 int main();
 
-void account_entry();
+void account_entry(string name, string initial);
