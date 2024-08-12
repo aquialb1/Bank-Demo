@@ -1,16 +1,12 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <stdio.h>
 #include "Header.h"
 
 using namespace std;
 
-void deposit(string name, string balance) {
-	string active_user = name;
-	string username_file;
-	string password_file;
-	float balance_str = stof(balance); //string --> float
-
+void deposit() {
 	float deposit_amount;
 	string new_balance;
 
@@ -20,15 +16,6 @@ void deposit(string name, string balance) {
 	cout << endl;
 
 	fstream user_list("user_list.txt");
-
-	if (deposit_amount > 0 && user_list.is_open()) {
-		string new_balance = to_string(balance_str += deposit_amount); //float --> string
-
-		
-	}
-	else {
-		cout << "Amount is invalid. Please try again." << endl << endl;
-	}
 }
 
 void withdraw() {
@@ -65,7 +52,7 @@ void account_entry(string name, string initial) {
 		cout << endl;
 
 		if (selection == "1") {
-			deposit(active_user, active_balance);
+			deposit();
 		}
 		else if (selection == "2") {
 			withdraw();
@@ -150,6 +137,48 @@ void create_account() {
 	}
 }
 
+void delete_account() {
+	fstream user_list, new_user_list;
+	int no_copy, count = 0;
+	string name, account_name, username, password, balance;
+
+	cout << "--------------------" << endl << endl;
+	cout << "DELETE A USER" << endl << endl;
+
+	new_user_list.open("new_user_list.txt", ios::app);
+	user_list.open("user_list.txt", ios::in);
+
+	if (user_list) {
+		cout << "Please enter the name of the account you would like to delete: ";
+		cin >> name;
+		cout << endl;
+
+		//Iterating user info from lines
+		while (getline(user_list, account_name, ',') && getline(user_list, username, ',') && getline(user_list, password, ',') && getline(user_list, balance, '\n')) {
+			//Comparing input name to account name for deletion
+			if (name == account_name) {
+				//Deleting by not copying to new_user_list
+				cout << "Account deleted successfully." << endl << endl;
+
+				count++;
+			}
+			else {
+				//Write account data we want to keep to new file
+				new_user_list << account_name << "," << username << "," << password << "," << balance << endl;
+			}
+		}
+		if (count == 0) {
+			cout << "Account not found." << endl << endl;
+		}
+
+	}
+	user_list.close();
+	new_user_list.close();
+
+	remove("user_list.txt");
+	rename("new_user_list.txt", "user_list.txt");
+}
+
 int main() {
     string selection;
 
@@ -157,7 +186,7 @@ int main() {
 
 	do {
 		cout << "Please select an option from the menu below." << endl << endl;
-		cout << "1 - Log In  |  2 - Create an Account  |  3 - Exit" << endl << endl;
+		cout << "1 - Log In  |  2 - Create an Account  |  3 - Delete Account  |  4 - Exit" << endl << endl;
 		cout << "Selection: ";
 		cin >> selection;
 		cout << endl;
@@ -171,12 +200,15 @@ int main() {
 			cout << endl;
 		}
 		else if (selection == "3") {
+			delete_account();
+		}
+		else if (selection == "4") {
 			exit(0);
 		}
 		else {
 			cout << "Invalid selection. Please try again." << endl << endl;
 		}
-	} while (selection != "3");
+	} while (selection != "4");
 
     cout << endl;
     return 0;

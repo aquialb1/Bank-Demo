@@ -1,2 +1,2 @@
-Ben,username,password,0
-Alex,hello,goodbye,0
+Ben,username,password,50
+Albert,yes,no,0
