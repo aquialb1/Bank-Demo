@@ -6,16 +6,46 @@
 
 using namespace std;
 
-void deposit() {
-	float deposit_amount;
-	string new_balance;
+void deposit(string name) {
+	fstream user_list, new_user_list;
+	int no_copy, count = 0;
+	float deposit_amount, new_balance;
+	string user_name = name, account_name, username, password, balance;
 
 	cout << "--------------------" << endl << endl;
-	cout << "Please enter an amount you would like to deposit: ";
-	cin >> deposit_amount;
-	cout << endl;
+	cout << "DEPOSIT" << endl << endl;
 
-	fstream user_list("user_list.txt");
+	new_user_list.open("new_user_list.txt", ios::app);
+	user_list.open("user_list.txt", ios::in);
+
+	if (user_list) {
+		cout << "Enter an amount you would like to deposit: ";
+		cin >> deposit_amount;
+		cout << endl;
+
+		//Iterate user info per line item
+		while (getline(user_list, account_name, ',') && getline(user_list, username, ',') && getline(user_list, password, ',') && getline(user_list, balance, '\n')) {
+			//Compare active user to account_name for balance update
+			if (user_name == account_name) {
+				new_balance = stof(balance) + deposit_amount;
+
+				new_user_list << account_name << "," << username << "," << password << "," << new_balance << endl;
+				count++;
+			}
+			else {
+				new_user_list << account_name << "," << username << "," << password << "," << balance << endl;
+			}
+		}
+		if (count == 0) {
+			cout << "INVALID" << endl << endl;
+		}
+	}
+	user_list.close();
+	new_user_list.close();
+
+	//Delete and rename
+	remove("user_list.txt");
+	rename("new_user_list.txt", "user_list.txt");
 }
 
 void withdraw() {
@@ -26,18 +56,12 @@ void withdraw() {
 	cin >> withdraw_amount;
 	cout << endl;
 
-	if (withdraw_amount > 0) {
-		//user_account.checking_value -= withdraw_amount;
-		//account_entry();
-	}
-	else {
-		cout << "Amount invalid. Please try again." << endl << endl;
-	}
+	
 }
 
-void account_entry(string name, string initial) {
+void account_entry(string name, string balance) {
 	string active_user = name;
-	string active_balance = initial;
+	string active_balance = balance;
 	string selection;
 
 	do {
@@ -46,13 +70,13 @@ void account_entry(string name, string initial) {
 
 		cout << "Balance: $" << active_balance << endl << endl;
 
-		cout << "1 - Deposit  |  2 - Withdraw  |  3 - Login/Logout" << endl << endl;
+		cout << "1 - Deposit  |  2 - Withdraw  |  3 - Logout/Menu" << endl << endl;
 		cout << "Selection: ";
 		cin >> selection;
 		cout << endl;
 
 		if (selection == "1") {
-			deposit();
+			deposit(active_user);
 		}
 		else if (selection == "2") {
 			withdraw();
@@ -149,32 +173,31 @@ void delete_account() {
 	user_list.open("user_list.txt", ios::in);
 
 	if (user_list) {
-		cout << "Please enter the name of the account you would like to delete: ";
+		cout << "Enter the name of the account you would like to delete: ";
 		cin >> name;
 		cout << endl;
 
-		//Iterating user info from lines
+		//Iterate user info per line item
 		while (getline(user_list, account_name, ',') && getline(user_list, username, ',') && getline(user_list, password, ',') && getline(user_list, balance, '\n')) {
-			//Comparing input name to account name for deletion
+			//Compare input name to account name for deletion
 			if (name == account_name) {
-				//Deleting by not copying to new_user_list
+				//Delete via copying to new_user_list
 				cout << "Account deleted successfully." << endl << endl;
-
 				count++;
 			}
 			else {
-				//Write account data we want to keep to new file
+				//Write account data to keep into new_user_list
 				new_user_list << account_name << "," << username << "," << password << "," << balance << endl;
 			}
 		}
 		if (count == 0) {
-			cout << "Account not found." << endl << endl;
+			cout << "Account not found. Please try again." << endl << endl;
 		}
-
 	}
 	user_list.close();
 	new_user_list.close();
 
+	//Delete and rename
 	remove("user_list.txt");
 	rename("new_user_list.txt", "user_list.txt");
 }
@@ -185,7 +208,7 @@ int main() {
     cout << "- MERCURY BANK -" << endl << endl;
 
 	do {
-		cout << "Please select an option from the menu below." << endl << endl;
+		cout << "Select an option from the menu below." << endl << endl;
 		cout << "1 - Log In  |  2 - Create an Account  |  3 - Delete Account  |  4 - Exit" << endl << endl;
 		cout << "Selection: ";
 		cin >> selection;
