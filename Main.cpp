@@ -10,7 +10,7 @@ void deposit(string name) {
 	fstream user_list, new_user_list;
 	int no_copy, count = 0;
 	float deposit_amount, new_balance;
-	string user_name = name, account_name, username, password, balance;
+	string active_user = name, account_name, username, password, balance;
 
 	cout << "--------------------" << endl << endl;
 	cout << "DEPOSIT" << endl << endl;
@@ -23,15 +23,22 @@ void deposit(string name) {
 		cin >> deposit_amount;
 		cout << endl;
 
-		//Iterate user info per line item
+		//Iterate through user_list per line item
 		while (getline(user_list, account_name, ',') && getline(user_list, username, ',') && getline(user_list, password, ',') && getline(user_list, balance, '\n')) {
-			//Compare active user to account_name for balance update
-			if (user_name == account_name) {
-				new_balance = stof(balance) + deposit_amount;
+			if (active_user == account_name) {
+				if (deposit_amount > 0) {
+					new_balance = stof(balance) + deposit_amount;
 
-				//Copy user info to new_user_list w/ updated balance
-				new_user_list << account_name << "," << username << "," << password << "," << new_balance << endl;
-				count++;
+					//Copy user info to new_user_list w/ updated balance
+					new_user_list << account_name << "," << username << "," << password << "," << new_balance << endl;
+					count++;
+				}
+				else {
+					cout << "Deposit amount cannot be negative. Please try again." << endl << endl;
+
+					new_user_list << account_name << "," << username << "," << password << "," << balance << endl;
+					count++;
+				}
 			}
 			else {
 				//Copy user info to new_user_list w/ unchanged balance
@@ -54,7 +61,7 @@ void withdraw(string name) {
 	fstream user_list, new_user_list;
 	int no_copy, count = 0;
 	float withdraw_amount, new_balance;
-	string user_name = name, account_name, username, password, balance;
+	string active_user = name, account_name, username, password, balance;
 
 	cout << "--------------------" << endl << endl;
 	cout << "WITHDRAW" << endl << endl;
@@ -67,15 +74,22 @@ void withdraw(string name) {
 		cin >> withdraw_amount;
 		cout << endl;
 
-		//Iterate user info per line item
+		//Iterate through user_list per line item
 		while (getline(user_list, account_name, ',') && getline(user_list, username, ',') && getline(user_list, password, ',') && getline(user_list, balance, '\n')) {
-			//Compare active user to account_name for balance update
-			if (user_name == account_name) {
-				new_balance = stof(balance) - withdraw_amount;
+			if (active_user == account_name) {
+				if (withdraw_amount > 0) {
+					new_balance = stof(balance) - withdraw_amount;
 
-				//Copy user info to new_user_list w/ updated balance
-				new_user_list << account_name << "," << username << "," << password << "," << new_balance << endl;
-				count++;
+					//Copy user info to new_user_list w/ updated balance
+					new_user_list << account_name << "," << username << "," << password << "," << new_balance << endl;
+					count++;
+				}
+				else {
+					cout << "Withdraw amount cannot be negative. Please try again." << endl << endl;
+
+					new_user_list << account_name << "," << username << "," << password << "," << balance << endl;
+					count++;
+				}
 			}
 			else {
 				//Copy user info to new_user_list w/ unchanged balance
@@ -171,7 +185,7 @@ void login() {
 		}
 		else {
 			cout << "Invalid username or password. Please try again." << endl << endl;
-			login();
+			main();
 		}
 	}
 }
@@ -198,13 +212,14 @@ void create_account() {
 	if (user_list) {
 		user_list << name_create << "," << username_create << "," << password_create << ',' << balance_create << endl;
 		user_list.close();
+		cout << "Account creation successful." << endl;
 	}
 	else {
 		cout << "Unable to Create account." << endl;
 	}
 }
 
-void account_list(){
+void all_accounts(){
 	ifstream user_list;
 	string name_file, username_file, password_file, balance_file;
 	
@@ -264,7 +279,8 @@ void delete_account() {
 }
 
 int main() {
-    string selection;
+	string menu_items[] = { "1", "2", "3", "4", "5" };
+	string selection;
 
     cout << "- MERCURY BANK -" << endl << endl;
 
@@ -275,29 +291,30 @@ int main() {
 		cin >> selection;
 		cout << endl;
 
-		if (selection == "1") {
+		if (selection == menu_items[0]) {
 			login();
 			cout << endl;
 		}
-		else if (selection == "2") {
+		else if (selection == menu_items[1]) {
 			create_account();
 			cout << endl;
 		}
-		else if (selection == "3") {
-			account_list();
+		else if (selection == menu_items[2]) {
+			all_accounts();
 			cout << endl;
 		}
-		else if (selection == "4") {
+		else if (selection == menu_items[3]) {
 			delete_account();
 			cout << endl;
 		}
-		else if (selection == "5") {
+		else if (selection == menu_items[4]) {
+			cout << "Thank you for using Mercury Bank!" << endl;
 			exit(0);
 		}
 		else {
 			cout << "Invalid selection. Please try again." << endl << endl;
 		}
-	} while (selection != "5");
+	} while (selection != menu_items[4]);
 
     cout << endl;
     return 0;
