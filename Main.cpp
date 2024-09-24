@@ -1,10 +1,12 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include <stdio.h>
+#include <cstdio>
+#include <cstdlib>
+#include "sqlite3.h"
 #include "Header.h"
 
-using namespace std;
+//using namespace std;
 
 void deposit(string name) {
 	fstream user_list, new_user_list;
@@ -77,11 +79,17 @@ void withdraw(string name) {
 		//Iterate through user_list per line item
 		while (getline(user_list, account_name, ',') && getline(user_list, username, ',') && getline(user_list, password, ',') && getline(user_list, balance, '\n')) {
 			if (active_user == account_name) {
-				if (withdraw_amount > 0) {
+				if (withdraw_amount >= 0) {
 					new_balance = stof(balance) - withdraw_amount;
 
 					//Copy user info to new_user_list w/ updated balance
 					new_user_list << account_name << "," << username << "," << password << "," << new_balance << endl;
+					count++;
+				}
+				else if (withdraw_amount > stof(balance)) {
+					cout << "Withdraw amount cannot be more than account balance. Please try again." << endl << endl;
+
+					new_user_list << account_name << "," << username << "," << password << "," << balance << endl;
 					count++;
 				}
 				else {
@@ -191,14 +199,18 @@ void login() {
 }
 
 void create_account() {
-	ofstream user_list;
+	sqlite3* DB;
+	int rc;
+	const char* sql;
+
+	rc = sqlite3_open("Users.db", &DB);
+	
 	string name_create, username_create, password_create;
-	float balance_create = 0;
 
 	cout << "--------------------" << endl << endl;
 	cout << "NEW USER" << endl << endl;
 
-	cout << "First Name: ";
+	cout << "Name: ";
 	cin >> name_create;
 
 	cout << "Username: ";
@@ -208,18 +220,27 @@ void create_account() {
 	cin >> password_create;
 	cout << endl;
 
-	user_list.open("user_list.txt", ios::app);
-	if (user_list) {
-		user_list << name_create << "," << username_create << "," << password_create << ',' << balance_create << endl;
-		user_list.close();
-		cout << "Account creation successful." << endl;
-	}
-	else {
-		cout << "Unable to Create account." << endl;
-	}
+	const char* name_char = &name_create[0];
+	const char* username_char = &username_create[0];
+	const char* password_char = &password_create[0];
+
+	sql = "INSERT INTO Accounts (Name, Username, Password) " \
+		  "VALUES (?, ?, ? ); ";
+
+	sqlite3_stmt* stmt;
+	sqlite3_prepare_v2(DB, sql, -1, &stmt, NULL);
+
+	sqlite3_bind_text(stmt, 1, name_char, strlen(name_char), SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 2, username_char, strlen(username_char), SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 3, password_char, strlen(password_char), SQLITE_STATIC);
+
+	sqlite3_step(stmt);
+
+	sqlite3_finalize(stmt);
+	sqlite3_close(DB);
 }
 
-void all_accounts(){
+void all_accounts() {
 	ifstream user_list;
 	string name_file, username_file, password_file, balance_file;
 	

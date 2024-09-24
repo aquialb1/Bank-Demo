@@ -1,2 +1,2 @@
-Sam,hello,goodbye,0
-Alex,username,password,0
+Sam,hello,goodbye,100
+Alex,username,password,1000
