@@ -241,21 +241,22 @@ void create_account() {
 }
 
 void all_accounts() {
-	ifstream user_list;
-	string name_file, username_file, password_file, balance_file;
+	sqlite3* DB;
+	char* ErrMsg = 0;
+	int rc;
+	const char* sql;
+	const char* data = "Callback function called";
+
+	rc = sqlite3_open("Users.db", &DB);
 	
 	cout << "--------------------" << endl << endl;
 	cout << "ALL USERS" << endl << endl;
 
-	user_list.open("user_list.txt");
+	sql = "SELECT * from Accounts";
 
-	if (user_list) {
-		while (getline(user_list, name_file, ',') && getline(user_list, username_file, ',') && getline(user_list, password_file, ',') && getline(user_list, balance_file, '\n')) {
-			cout << "Name: " << name_file << endl;
-			cout << "Balance: $" << balance_file << endl << endl;
-		}
-		user_list.close();
-	}
+	rc = sqlite3_exec(DB, sql, callback, (void*)data, &ErrMsg);
+
+	sqlite3_close(DB);
 }
 
 void delete_account() {
