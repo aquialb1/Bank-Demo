@@ -202,10 +202,10 @@ void create_account() {
 	sqlite3* DB;
 	int rc;
 	const char* sql;
-
-	rc = sqlite3_open("Users.db", &DB);
 	
 	string name_create, username_create, password_create;
+
+	rc = sqlite3_open("Users.db", &DB);
 
 	cout << "--------------------" << endl << endl;
 	cout << "NEW USER" << endl << endl;
@@ -234,7 +234,14 @@ void create_account() {
 	sqlite3_bind_text(stmt, 2, username_char, strlen(username_char), SQLITE_STATIC);
 	sqlite3_bind_text(stmt, 3, password_char, strlen(password_char), SQLITE_STATIC);
 
-	sqlite3_step(stmt);
+	rc = sqlite3_step(stmt);
+
+	if (rc != SQLITE_DONE) {
+		cout << "Unable to create account. Please try again." << endl;
+	}
+	else {
+		cout << "Account created successfully." << endl;
+	}
 
 	sqlite3_finalize(stmt);
 	sqlite3_close(DB);
@@ -245,7 +252,7 @@ void all_accounts() {
 	char* ErrMsg = 0;
 	int rc;
 	const char* sql;
-	const char* data = "Callback function called";
+	const char* data = "Callback function called.";
 
 	rc = sqlite3_open("Users.db", &DB);
 	
@@ -260,44 +267,43 @@ void all_accounts() {
 }
 
 void delete_account() {
-	fstream user_list, new_user_list;
-	int no_copy, count = 0;
-	string name, account_name, username, password, balance;
+	sqlite3* DB;
+	char* ErrMsg = 0;
+	int rc;
+	const char* sql;
+	const char* data = "Callback function called.";
+	
+	string account_name;
+
+	rc = sqlite3_open("Users.db", &DB);
 
 	cout << "--------------------" << endl << endl;
 	cout << "DELETE AN ACCOUNT" << endl << endl;
 
-	new_user_list.open("new_user_list.txt", ios::app);
-	user_list.open("user_list.txt", ios::in);
+	cout << "Account Name: ";
+	cin >> account_name;
+	cout << endl;
 
-	if (user_list) {
-		cout << "Enter the name of the account you would like to delete: ";
-		cin >> name;
-		cout << endl;
+	const char* delete_char = &account_name[0];
 
-		//Iterate user info per line item
-		while (getline(user_list, account_name, ',') && getline(user_list, username, ',') && getline(user_list, password, ',') && getline(user_list, balance, '\n')) {
-			//Compare input name to account name for deletion
-			if (name == account_name) {
-				//Delete via copying to new_user_list
-				cout << "Account successfully deleted." << endl << endl;
-				count++;
-			}
-			else {
-				//Write account data to keep into new_user_list
-				new_user_list << account_name << "," << username << "," << password << "," << balance << endl;
-			}
-		}
-		if (count == 0) {
-			cout << "Account not found. Please try again." << endl << endl;
-		}
+	sql = "DELETE FROM Accounts WHERE Name = ? ";
+
+	sqlite3_stmt* stmt;
+	sqlite3_prepare_v2(DB, sql, -1, &stmt, NULL);
+
+	sqlite3_bind_text(stmt, 1, delete_char, strlen(delete_char), SQLITE_STATIC);
+
+	rc = sqlite3_step(stmt);
+
+	if (rc != SQLITE_DONE) {
+		cout << "Unable to delete account. Please try again." << endl;
 	}
-	user_list.close();
-	new_user_list.close();
+	else {
+		cout << "Account deleted successfully." << endl;
+	}
 
-	//Delete and rename
-	remove("user_list.txt");
-	rename("new_user_list.txt", "user_list.txt");
+	sqlite3_finalize(stmt);
+	sqlite3_close(DB);
 }
 
 int main() {
