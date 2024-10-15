@@ -6,114 +6,160 @@
 #include "sqlite3.h"
 #include "Header.h"
 
-//using namespace std;
+using namespace std;
 
-void deposit(string name) {
-	fstream user_list, new_user_list;
-	int no_copy, count = 0;
-	float deposit_amount, new_balance;
-	string active_user = name, account_name, username, password, balance;
+void deposit() {
+	sqlite3* DB;
+	char* ErrMsg = 0;
+	int rc;
+	const char* sql;
+	const char* data = "Callback function called.";
+	
+	string account_name, deposit_amount;
+	bool is_valid_balance = false;
+
+	rc = sqlite3_open("Users.db", &DB);
 
 	cout << "--------------------" << endl << endl;
 	cout << "DEPOSIT" << endl << endl;
 
-	new_user_list.open("new_user_list.txt", ios::app);
-	user_list.open("user_list.txt", ios::in);
+	cout << "Enter the Account Name: ";
+	cin >> account_name;
+	cout << endl;
 
-	if (user_list) {
-		cout << "Enter an amount you would like to deposit: $";
-		cin >> deposit_amount;
-		cout << endl;
+	cout << "Deposit Amount: ";
+	cin >> deposit_amount;
+	cout << endl;
 
-		//Iterate through user_list per line item
-		while (getline(user_list, account_name, ',') && getline(user_list, username, ',') && getline(user_list, password, ',') && getline(user_list, balance, '\n')) {
-			if (active_user == account_name) {
-				if (deposit_amount > 0) {
-					new_balance = stof(balance) + deposit_amount;
-
-					//Copy user info to new_user_list w/ updated balance
-					new_user_list << account_name << "," << username << "," << password << "," << new_balance << endl;
-					count++;
-				}
-				else {
-					cout << "Deposit amount cannot be negative. Please try again." << endl << endl;
-
-					new_user_list << account_name << "," << username << "," << password << "," << balance << endl;
-					count++;
-				}
-			}
-			else {
-				//Copy user info to new_user_list w/ unchanged balance
-				new_user_list << account_name << "," << username << "," << password << "," << balance << endl;
-			}
+	for (int i = 0; i < deposit_amount.length(); i++) {
+		if (isdigit(deposit_amount[i])) {
+			is_valid_balance = true;
+			continue;
 		}
-		if (count == 0) {
-			cout << "INVALID" << endl << endl;
+		else {
+			cout << "Balance can only have positive numbers." << endl;
+			is_valid_balance = false;
+			break;
 		}
 	}
-	user_list.close();
-	new_user_list.close();
 
-	//Delete and rename
-	remove("user_list.txt");
-	rename("new_user_list.txt", "user_list.txt");
+	if (is_valid_balance) {
+		const char* deposit_char = &deposit_amount[0];
+		const char* name_char = &account_name[0];
+
+		sql = "UPDATE Accounts set Balance = Balance + ? WHERE Name = ? ";
+
+		sqlite3_stmt* stmt;
+		sqlite3_prepare_v2(DB, sql, -1, &stmt, NULL);
+
+		/*sqlite3_bind_text(stmt, 2, username_char, strlen(username_char), SQLITE_STATIC);*/
+		sqlite3_bind_text(stmt, 1, deposit_char, strlen(deposit_char), SQLITE_STATIC);
+		sqlite3_bind_text(stmt, 2, name_char, strlen(name_char), SQLITE_STATIC);
+
+		rc = sqlite3_step(stmt);
+		sqlite3_finalize(stmt);
+
+		if (rc != SQLITE_DONE) {
+			cout << "Fail." << endl;
+		}
+		else {
+			cout << "Success." << endl;
+
+			sql = "SELECT Balance FROM Accounts WHERE Name = ? ";
+
+			sqlite3_stmt* stmt_1;
+			sqlite3_prepare_v2(DB, sql, -1, &stmt_1, NULL);
+
+			sqlite3_bind_text(stmt_1, 1, name_char, strlen(name_char), SQLITE_STATIC);
+
+			while ((rc = sqlite3_step(stmt_1)) == SQLITE_ROW) {
+				double new_balance = sqlite3_column_double(stmt_1, 0);
+				cout << "Balance: " << new_balance << endl;
+			}
+
+			//rc = sqlite3_step(stmt_1);
+			sqlite3_finalize(stmt_1);
+		}
+
+		sqlite3_close(DB);
+	}
 }
 
-void withdraw(string name) {
-	fstream user_list, new_user_list;
-	int no_copy, count = 0;
-	float withdraw_amount, new_balance;
-	string active_user = name, account_name, username, password, balance;
+void withdraw() {
+	sqlite3* DB;
+	char* ErrMsg = 0;
+	int rc;
+	const char* sql;
+	const char* data = "Callback function called.";
+
+	string account_name, withdraw_amount;
+	bool is_valid_withdraw = false;
+
+	rc = sqlite3_open("Users.db", &DB);
 
 	cout << "--------------------" << endl << endl;
-	cout << "WITHDRAW" << endl << endl;
+	cout << "DEPOSIT" << endl << endl;
 
-	new_user_list.open("new_user_list.txt", ios::app);
-	user_list.open("user_list.txt", ios::in);
+	cout << "Enter the Account Name: ";
+	cin >> account_name;
+	cout << endl;
 
-	if (user_list) {
-		cout << "Enter an amount you would like to withdraw: $";
-		cin >> withdraw_amount;
-		cout << endl;
+	cout << "Withdraw Amount: ";
+	cin >> withdraw_amount;
+	cout << endl;
 
-		//Iterate through user_list per line item
-		while (getline(user_list, account_name, ',') && getline(user_list, username, ',') && getline(user_list, password, ',') && getline(user_list, balance, '\n')) {
-			if (active_user == account_name) {
-				if (withdraw_amount >= 0) {
-					new_balance = stof(balance) - withdraw_amount;
-
-					//Copy user info to new_user_list w/ updated balance
-					new_user_list << account_name << "," << username << "," << password << "," << new_balance << endl;
-					count++;
-				}
-				else if (withdraw_amount > stof(balance)) {
-					cout << "Withdraw amount cannot be more than account balance. Please try again." << endl << endl;
-
-					new_user_list << account_name << "," << username << "," << password << "," << balance << endl;
-					count++;
-				}
-				else {
-					cout << "Withdraw amount cannot be negative. Please try again." << endl << endl;
-
-					new_user_list << account_name << "," << username << "," << password << "," << balance << endl;
-					count++;
-				}
-			}
-			else {
-				//Copy user info to new_user_list w/ unchanged balance
-				new_user_list << account_name << "," << username << "," << password << "," << balance << endl;
-			}
+	for (int i = 0; i < withdraw_amount.length(); i++) {
+		if (isdigit(withdraw_amount[i])) {
+			is_valid_withdraw = true;
+			continue;
 		}
-		if (count == 0) {
-			cout << "INVALID" << endl << endl;
+		else {
+			cout << "Balance can only have positive numbers." << endl;
+			is_valid_withdraw = false;
+			break;
 		}
 	}
-	user_list.close();
-	new_user_list.close();
 
-	//Delete and rename
-	remove("user_list.txt");
-	rename("new_user_list.txt", "user_list.txt");
+	if (is_valid_withdraw) {
+		const char* withdraw_char = &withdraw_amount[0];
+		const char* name_char = &account_name[0];
+
+		sql = "UPDATE Accounts set Balance = Balance - ? WHERE Name = ? ";
+
+		sqlite3_stmt* stmt;
+		sqlite3_prepare_v2(DB, sql, -1, &stmt, NULL);
+
+		/*sqlite3_bind_text(stmt, 2, username_char, strlen(username_char), SQLITE_STATIC);*/
+		sqlite3_bind_text(stmt, 1, withdraw_char, strlen(withdraw_char), SQLITE_STATIC);
+		sqlite3_bind_text(stmt, 2, name_char, strlen(name_char), SQLITE_STATIC);
+
+		rc = sqlite3_step(stmt);
+		sqlite3_finalize(stmt);
+
+		if (rc != SQLITE_DONE) {
+			cout << "Fail." << endl;
+		}
+		else {
+			cout << "Success." << endl;
+
+			sql = "SELECT Balance FROM Accounts WHERE Name = ? ";
+
+			sqlite3_stmt* stmt_1;
+			sqlite3_prepare_v2(DB, sql, -1, &stmt_1, NULL);
+
+			sqlite3_bind_text(stmt_1, 1, name_char, strlen(name_char), SQLITE_STATIC);
+
+			while ((rc = sqlite3_step(stmt_1)) == SQLITE_ROW) {
+				double new_balance = sqlite3_column_double(stmt_1, 0);
+				cout << "Balance: " << new_balance << endl;
+			}
+
+			//rc = sqlite3_step(stmt_1);
+			sqlite3_finalize(stmt_1);
+		}
+
+		sqlite3_close(DB);
+	}
 }
 
 void account_entry(string name) {
@@ -145,10 +191,10 @@ void account_entry(string name) {
 		cout << endl;
 
 		if (selection == "1") {
-			deposit(active_user);
+			deposit();
 		}
 		else if (selection == "2") {
-			withdraw(active_user);
+			withdraw();
 		}
 		else if (selection == "3") {
 			main();
@@ -160,10 +206,15 @@ void account_entry(string name) {
 }
 
 void login() {
-	ifstream user_list;
+	sqlite3* DB;
+	char* ErrMsg = 0;
+	int rc;
+	const char* sql;
+	const char* data = "Callback function called.";
+	
 	string username_input, password_input;
 
-	string name_file, username_file, password_file, balance_file;
+	rc = sqlite3_open("Users.db", &DB);
 
 	cout << "--------------------" << endl << endl;
 	cout << "RETURNING USER" << endl << endl;
@@ -175,27 +226,21 @@ void login() {
 	cin >> password_input;
 	cout << endl;
 
-	user_list.open("user_list.txt");
-	bool isloggedin = false;
+	const char* username_input_char = &username_input[0];
+	const char* password_input_char = &password_input[0];
 
-	if (user_list) {
-		while (getline(user_list, name_file, ',') && getline(user_list, username_file, ',') && getline(user_list, password_file, ',') && getline(user_list, balance_file, '\n')) {
-			if (username_file == username_input && password_file == password_input) {
-				isloggedin = true;
-				break;
-			}
-		}
-		user_list.close();
+	sql = "SELECT * FROM Accounts WHERE Username = ?, Password = ?";
 
-		if (isloggedin) {
-			cout << "Login successful." << endl << endl;
-			account_entry(name_file);
-		}
-		else {
-			cout << "Invalid username or password. Please try again." << endl << endl;
-			main();
-		}
+	rc = sqlite3_exec(DB, sql, callback, (void*)data, &ErrMsg);
+
+	if (rc != SQLITE_OK) {
+		cout << "Login failed. Please try again later." << endl;
 	}
+	else {
+		cout << "Login successful." << endl;
+	}
+
+	sqlite3_close(DB);
 }
 
 void create_account() {
@@ -220,12 +265,26 @@ void create_account() {
 	cin >> password_create;
 	cout << endl;
 
+	/*cout << "Balance: ";
+	cin >> balance_create;
+	cout << endl;*/
+
+	/*for (int i = 0; i < balance_create.length(); i++) {
+		if (isalpha(balance_create[i])) {
+			cout << "Balance cannot have letters." << endl;
+			break;
+		}
+		else {
+			cout << "Good" << endl;
+		}
+	}*/
+
 	const char* name_char = &name_create[0];
 	const char* username_char = &username_create[0];
 	const char* password_char = &password_create[0];
 
-	sql = "INSERT INTO Accounts (Name, Username, Password) " \
-		  "VALUES (?, ?, ? ); ";
+	sql = "INSERT INTO Accounts (Name, Username, Password, Balance) " \
+		  "VALUES (?, ?, ?, ); ";
 
 	sqlite3_stmt* stmt;
 	sqlite3_prepare_v2(DB, sql, -1, &stmt, NULL);
@@ -259,7 +318,7 @@ void all_accounts() {
 	cout << "--------------------" << endl << endl;
 	cout << "ALL USERS" << endl << endl;
 
-	sql = "SELECT * from Accounts";
+	sql = "SELECT Name, Balance FROM Accounts";
 
 	rc = sqlite3_exec(DB, sql, callback, (void*)data, &ErrMsg);
 
@@ -314,13 +373,14 @@ int main() {
 
 	do {
 		cout << "Select an option from the menu below." << endl << endl;
-		cout << "1 - Log In  |  2 - Create an Account  |  3 - All Users  |  4 - Delete Account  |  5 - Exit" << endl << endl;
+		cout << "1 - Deposit  |  2 - Create an Account  |  3 - All Users  |  4 - Delete Account  |  5 - Exit" << endl << endl;
 		cout << "Selection: ";
 		cin >> selection;
 		cout << endl;
 
 		if (selection == menu_items[0]) {
-			login();
+			//deposit();
+			withdraw();
 			cout << endl;
 		}
 		else if (selection == menu_items[1]) {
