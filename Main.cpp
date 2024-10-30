@@ -37,7 +37,7 @@ void deposit() {
 			continue;
 		}
 		else {
-			cout << "Balance can only have positive numbers." << endl;
+			cout << "Deposit can only have positive numbers." << endl;
 			is_valid_balance = false;
 			break;
 		}
@@ -65,7 +65,7 @@ void deposit() {
 		else {
 			cout << "Success." << endl;
 
-			sql = "SELECT Balance FROM Accounts WHERE Name = ? ";
+			sql = "SELECT Username, Balance FROM Accounts WHERE Name = ? ";
 
 			sqlite3_stmt* stmt_1;
 			sqlite3_prepare_v2(DB, sql, -1, &stmt_1, NULL);
@@ -98,7 +98,7 @@ void withdraw() {
 	rc = sqlite3_open("Users.db", &DB);
 
 	cout << "--------------------" << endl << endl;
-	cout << "DEPOSIT" << endl << endl;
+	cout << "WITHDRAW" << endl << endl;
 
 	cout << "Enter the Account Name: ";
 	cin >> account_name;
@@ -114,7 +114,7 @@ void withdraw() {
 			continue;
 		}
 		else {
-			cout << "Balance can only have positive numbers." << endl;
+			cout << "Whithdraw can only have positive numbers." << endl;
 			is_valid_withdraw = false;
 			break;
 		}
@@ -154,7 +154,6 @@ void withdraw() {
 				cout << "Balance: " << new_balance << endl;
 			}
 
-			//rc = sqlite3_step(stmt_1);
 			sqlite3_finalize(stmt_1);
 		}
 
@@ -205,16 +204,47 @@ void account_entry(string name) {
 	} while (selection != "3");
 }
 
-void login() {
+bool get_account_info(string& username, string& password) {
 	sqlite3* DB;
-	char* ErrMsg = 0;
 	int rc;
 	const char* sql;
-	const char* data = "Callback function called.";
-	
-	string username_input, password_input;
 
 	rc = sqlite3_open("Users.db", &DB);
+
+	sql = "SELECT Name, Balance FROM Accounts WHERE Username = ? AND Password = ?";
+
+	sqlite3_stmt* stmt;
+	rc = sqlite3_prepare_v2(DB, sql, -1, &stmt, NULL);
+
+	sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 2, password.c_str(), -1, SQLITE_STATIC);
+
+	if (sqlite3_step(stmt) == SQLITE_ROW) {
+		const unsigned char* name = sqlite3_column_text(stmt, 0);
+		double balance = sqlite3_column_double(stmt, 1);
+		string selection;
+
+		cout << "Access granted." << endl << endl;
+
+		cout << "Welcome, " << name << endl;
+		cout << "Balance: " << balance << endl;
+
+		sqlite3_finalize(stmt);
+		sqlite3_close(DB);
+
+		return true;
+	}
+	else {
+		cout << "Invalid username or password." << endl;
+		sqlite3_finalize(stmt);
+		sqlite3_close(DB);
+
+		return false;
+	}
+}
+
+void login() {
+	string username_input, password_input;
 
 	cout << "--------------------" << endl << endl;
 	cout << "RETURNING USER" << endl << endl;
@@ -226,21 +256,7 @@ void login() {
 	cin >> password_input;
 	cout << endl;
 
-	const char* username_input_char = &username_input[0];
-	const char* password_input_char = &password_input[0];
-
-	sql = "SELECT * FROM Accounts WHERE Username = ?, Password = ?";
-
-	rc = sqlite3_exec(DB, sql, callback, (void*)data, &ErrMsg);
-
-	if (rc != SQLITE_OK) {
-		cout << "Login failed. Please try again later." << endl;
-	}
-	else {
-		cout << "Login successful." << endl;
-	}
-
-	sqlite3_close(DB);
+	get_account_info(username_input, password_input);
 }
 
 void create_account() {
@@ -265,10 +281,6 @@ void create_account() {
 	cin >> password_create;
 	cout << endl;
 
-	/*cout << "Balance: ";
-	cin >> balance_create;
-	cout << endl;*/
-
 	/*for (int i = 0; i < balance_create.length(); i++) {
 		if (isalpha(balance_create[i])) {
 			cout << "Balance cannot have letters." << endl;
@@ -283,8 +295,8 @@ void create_account() {
 	const char* username_char = &username_create[0];
 	const char* password_char = &password_create[0];
 
-	sql = "INSERT INTO Accounts (Name, Username, Password, Balance) " \
-		  "VALUES (?, ?, ?, ); ";
+	sql = "INSERT INTO Accounts (Name, Username, Password) " \
+		  "VALUES (?, ?, ? ); ";
 
 	sqlite3_stmt* stmt;
 	sqlite3_prepare_v2(DB, sql, -1, &stmt, NULL);
@@ -318,7 +330,7 @@ void all_accounts() {
 	cout << "--------------------" << endl << endl;
 	cout << "ALL USERS" << endl << endl;
 
-	sql = "SELECT Name, Balance FROM Accounts";
+	sql = "SELECT * FROM Accounts";
 
 	rc = sqlite3_exec(DB, sql, callback, (void*)data, &ErrMsg);
 
@@ -366,21 +378,21 @@ void delete_account() {
 }
 
 int main() {
-	string menu_items[] = { "1", "2", "3", "4", "5" };
+	string menu_items[] = { "1", "2", "3", "4", "5", "6" };
 	string selection;
 
     cout << "- MERCURY BANK -" << endl << endl;
 
 	do {
 		cout << "Select an option from the menu below." << endl << endl;
-		cout << "1 - Deposit  |  2 - Create an Account  |  3 - All Users  |  4 - Delete Account  |  5 - Exit" << endl << endl;
+		cout << "1 - Login  |  2 - Create an Account  |  3 - All Users  |  4 - Delete Account  |  5 - Deposit  |  6 - Exit" << endl << endl;
 		cout << "Selection: ";
 		cin >> selection;
 		cout << endl;
 
 		if (selection == menu_items[0]) {
-			//deposit();
-			withdraw();
+			login();
+			//withdraw();
 			cout << endl;
 		}
 		else if (selection == menu_items[1]) {
@@ -396,13 +408,17 @@ int main() {
 			cout << endl;
 		}
 		else if (selection == menu_items[4]) {
+			deposit();
+			cout << endl;
+		}
+		else if (selection == menu_items[5]) {
 			cout << "Thank you for using Mercury Bank!" << endl;
 			exit(0);
 		}
 		else {
 			cout << "Invalid selection. Please try again." << endl << endl;
 		}
-	} while (selection != menu_items[4]);
+	} while (selection != menu_items[5]);
 
     cout << endl;
     return 0;
