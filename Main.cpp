@@ -161,28 +161,16 @@ void withdraw() {
 	}
 }
 
-void account_entry(string name) {
-	ifstream user_list;
-	string active_user = name;
-	string name_file, username_file, password_file, balance_file;
+void account_entry(string user) {
+	string name = user;
+	
 	string selection;
 
 	do {
-		user_list.open("user_list.txt");
-
-		if (user_list) {
-			while (getline(user_list, name_file, ',') && getline(user_list, username_file, ',') && getline(user_list, password_file, ',') && getline(user_list, balance_file, '\n')) {
-				if (active_user == name_file) {
-					break;
-				}
-			}
-			user_list.close();
-		}
-
 		cout << "--------------------" << endl << endl;
-		cout << "Welcome, " << active_user << endl << endl;
+		cout << "Welcome, " << name << endl << endl;
 
-		cout << "Balance: $" << balance_file << endl << endl;
+		cout << "Balance: $" << "balance_file" << endl << endl;
 
 		cout << "1 - Deposit  |  2 - Withdraw  |  3 - Logout/Menu" << endl << endl;
 		cout << "Selection: ";
@@ -196,7 +184,7 @@ void account_entry(string name) {
 			withdraw();
 		}
 		else if (selection == "3") {
-			main();
+			return;
 		}
 		else {
 			cout << "Invalid selection. Please try again." << endl << endl;
@@ -204,7 +192,7 @@ void account_entry(string name) {
 	} while (selection != "3");
 }
 
-bool get_account_info(string& username, string& password) {
+bool login_verify(string& username, string& password) {
 	sqlite3* DB;
 	int rc;
 	const char* sql;
@@ -220,17 +208,19 @@ bool get_account_info(string& username, string& password) {
 	sqlite3_bind_text(stmt, 2, password.c_str(), -1, SQLITE_STATIC);
 
 	if (sqlite3_step(stmt) == SQLITE_ROW) {
-		const unsigned char* name = sqlite3_column_text(stmt, 0);
+		const unsigned char* user = sqlite3_column_text(stmt, 0);
 		double balance = sqlite3_column_double(stmt, 1);
 		string selection;
 
-		cout << "Access granted." << endl << endl;
+		cout << "Login successful." << endl << endl;
 
-		cout << "Welcome, " << name << endl;
-		cout << "Balance: " << balance << endl;
+		//string name(reinterpret_cast<const char*>(user));
+		string name = reinterpret_cast<const char*>(user);
 
 		sqlite3_finalize(stmt);
 		sqlite3_close(DB);
+
+		account_entry(name);
 
 		return true;
 	}
@@ -256,7 +246,7 @@ void login() {
 	cin >> password_input;
 	cout << endl;
 
-	get_account_info(username_input, password_input);
+	login_verify(username_input, password_input);
 }
 
 void create_account() {
@@ -385,14 +375,13 @@ int main() {
 
 	do {
 		cout << "Select an option from the menu below." << endl << endl;
-		cout << "1 - Login  |  2 - Create an Account  |  3 - All Users  |  4 - Delete Account  |  5 - Deposit  |  6 - Exit" << endl << endl;
+		cout << "1 - Login  |  2 - Create an Account  |  3 - All Users  |  4 - Delete Account  |  5 - Exit" << endl << endl;
 		cout << "Selection: ";
 		cin >> selection;
 		cout << endl;
 
 		if (selection == menu_items[0]) {
 			login();
-			//withdraw();
 			cout << endl;
 		}
 		else if (selection == menu_items[1]) {
@@ -408,17 +397,13 @@ int main() {
 			cout << endl;
 		}
 		else if (selection == menu_items[4]) {
-			deposit();
-			cout << endl;
-		}
-		else if (selection == menu_items[5]) {
 			cout << "Thank you for using Mercury Bank!" << endl;
 			exit(0);
 		}
 		else {
 			cout << "Invalid selection. Please try again." << endl << endl;
 		}
-	} while (selection != menu_items[5]);
+	} while (selection != menu_items[4]);
 
     cout << endl;
     return 0;
