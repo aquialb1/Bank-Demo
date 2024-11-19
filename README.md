@@ -1,1 +1,1 @@
-[![Embedded Diagram](Bank-Demo-Menu-Structure.png)](Bank-Demo-Menu-Structure.png)
+[![Embedded Diagram](Bank Demo Menu Structure.png)](Bank Demo Menu Structure.png)
