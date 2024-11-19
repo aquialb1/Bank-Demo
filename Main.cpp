@@ -23,10 +23,6 @@ void deposit(string user) {
 	cout << "--------------------" << endl << endl;
 	cout << "DEPOSIT" << endl << endl;
 
-	/*cout << "Enter the Account Name: ";
-	cin >> account_name;
-	cout << endl;*/
-
 	cout << "Deposit Amount: ";
 	cin >> deposit_amount;
 	cout << endl;
@@ -52,7 +48,6 @@ void deposit(string user) {
 		sqlite3_stmt* stmt;
 		sqlite3_prepare_v2(DB, sql, -1, &stmt, NULL);
 
-		/*sqlite3_bind_text(stmt, 2, username_char, strlen(username_char), SQLITE_STATIC);*/
 		sqlite3_bind_text(stmt, 1, deposit_char, strlen(deposit_char), SQLITE_STATIC);
 		sqlite3_bind_text(stmt, 2, name_char, strlen(name_char), SQLITE_STATIC);
 
@@ -65,44 +60,25 @@ void deposit(string user) {
 		}
 		else {
 			cout << "Success." << endl << endl;
-
 			return;
-
-			/*sql = "SELECT Username, Balance FROM Accounts WHERE Name = ? ";
-
-			sqlite3_stmt* stmt_1;
-			sqlite3_prepare_v2(DB, sql, -1, &stmt_1, NULL);
-
-			sqlite3_bind_text(stmt_1, 1, name_char, strlen(name_char), SQLITE_STATIC);
-
-			while ((rc = sqlite3_step(stmt_1)) == SQLITE_ROW) {
-				double new_balance = sqlite3_column_double(stmt_1, 0);
-				cout << "Balance: " << new_balance << endl;
-			}*/
-
-			//sqlite3_finalize(stmt_1);
 		}
 	}
 }
 
-void withdraw() {
+void withdraw(string user) {
 	sqlite3* DB;
 	char* ErrMsg = 0;
 	int rc;
 	const char* sql;
 	const char* data = "Callback function called.";
 
-	string account_name, withdraw_amount;
+	string account_name = user, withdraw_amount;
 	bool is_valid_withdraw = false;
 
 	rc = sqlite3_open("Users.db", &DB);
 
 	cout << "--------------------" << endl << endl;
 	cout << "WITHDRAW" << endl << endl;
-
-	cout << "Enter the Account Name: ";
-	cin >> account_name;
-	cout << endl;
 
 	cout << "Withdraw Amount: ";
 	cin >> withdraw_amount;
@@ -129,35 +105,20 @@ void withdraw() {
 		sqlite3_stmt* stmt;
 		sqlite3_prepare_v2(DB, sql, -1, &stmt, NULL);
 
-		/*sqlite3_bind_text(stmt, 2, username_char, strlen(username_char), SQLITE_STATIC);*/
 		sqlite3_bind_text(stmt, 1, withdraw_char, strlen(withdraw_char), SQLITE_STATIC);
 		sqlite3_bind_text(stmt, 2, name_char, strlen(name_char), SQLITE_STATIC);
 
 		rc = sqlite3_step(stmt);
 		sqlite3_finalize(stmt);
+		sqlite3_close(DB);
 
 		if (rc != SQLITE_DONE) {
 			cout << "Fail." << endl;
 		}
 		else {
-			cout << "Success." << endl;
-
-			sql = "SELECT Balance FROM Accounts WHERE Name = ? ";
-
-			sqlite3_stmt* stmt_1;
-			sqlite3_prepare_v2(DB, sql, -1, &stmt_1, NULL);
-
-			sqlite3_bind_text(stmt_1, 1, name_char, strlen(name_char), SQLITE_STATIC);
-
-			while ((rc = sqlite3_step(stmt_1)) == SQLITE_ROW) {
-				double new_balance = sqlite3_column_double(stmt_1, 0);
-				cout << "Balance: " << new_balance << endl;
-			}
-
-			sqlite3_finalize(stmt_1);
+			cout << "Success." << endl << endl;
+			return;
 		}
-
-		sqlite3_close(DB);
 	}
 }
 
@@ -179,24 +140,18 @@ void get_balance(string user) {
 
 	if (sqlite3_step(stmt) == SQLITE_ROW) {
 		double balance = sqlite3_column_double(stmt, 0);
-
 		cout << "Balance: $" << balance << endl << endl;
-
-		sqlite3_finalize(stmt);
-		sqlite3_close(DB);
-		return;
 	}
 	else {
 		cout << "Invalid." << endl;
-		sqlite3_finalize(stmt);
-		sqlite3_close(DB);
 	}
+	sqlite3_finalize(stmt);
+	sqlite3_close(DB);
+	return;
 }
 
 void account_entry(string user) {
 	string name = user;
-	//double amount = balance;
-
 	string selection;
 
 	do {
@@ -204,8 +159,6 @@ void account_entry(string user) {
 		cout << "Welcome, " << name << endl << endl;
 
 		get_balance(name);
-
-		//cout << "Balance: $" << amount << endl << endl;
 
 		cout << "1 - Deposit  |  2 - Withdraw  |  3 - Logout/Menu" << endl << endl;
 		cout << "Selection: ";
@@ -216,7 +169,7 @@ void account_entry(string user) {
 			deposit(name);
 		}
 		else if (selection == "2") {
-			withdraw();
+			withdraw(name);
 		}
 		else if (selection == "3") {
 			return;
