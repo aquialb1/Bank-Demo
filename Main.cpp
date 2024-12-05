@@ -18,50 +18,65 @@ void deposit(string user) {
 	string account_name = user, deposit_amount;
 	bool is_valid_balance = false;
 
-	rc = sqlite3_open("Users.db", &DB);
+	string account_choice, checking = "Checking", savings = "Savings";
 
-	cout << "--------------------" << endl << endl;
-	cout << "DEPOSIT" << endl << endl;
+	cout << "Which account would you like to deposit to?" << endl;
+	cin >> account_choice;
 
-	cout << "Deposit Amount: ";
-	cin >> deposit_amount;
-	cout << endl;
+	if (account_choice == checking) {
+		rc = sqlite3_open("Users.db", &DB);
 
-	for (int i = 0; i < deposit_amount.length(); i++) {
-		if (isdigit(deposit_amount[i])) {
-			is_valid_balance = true;
-			continue;
+		cout << "--------------------" << endl << endl;
+		cout << "DEPOSIT" << endl << endl;
+
+		cout << "Deposit Amount: ";
+		cin >> deposit_amount;
+		cout << endl;
+
+		for (int i = 0; i < deposit_amount.length(); i++) {
+			if (isdigit(deposit_amount[i])) {
+				is_valid_balance = true;
+				continue;
+			}
+			else {
+				cout << "Deposit can only have positive numbers." << endl;
+				is_valid_balance = false;
+				break;
+			}
 		}
-		else {
-			cout << "Deposit can only have positive numbers." << endl;
-			is_valid_balance = false;
-			break;
+
+		if (is_valid_balance) {
+			const char* deposit_char = &deposit_amount[0];
+			const char* name_char = &account_name[0];
+
+			sql = "UPDATE Accounts set Checking = Checking + ? WHERE Name = ? ";
+
+			sqlite3_stmt* stmt;
+			sqlite3_prepare_v2(DB, sql, -1, &stmt, NULL);
+
+			sqlite3_bind_text(stmt, 1, deposit_char, strlen(deposit_char), SQLITE_STATIC);
+			sqlite3_bind_text(stmt, 2, name_char, strlen(name_char), SQLITE_STATIC);
+
+			rc = sqlite3_step(stmt);
+			sqlite3_finalize(stmt);
+			sqlite3_close(DB);
+
+			if (rc != SQLITE_DONE) {
+				cout << "Fail." << endl << endl;
+			}
+			else {
+				cout << "Success." << endl << endl;
+				return;
+			}
 		}
 	}
 
-	if (is_valid_balance) {
-		const char* deposit_char = &deposit_amount[0];
-		const char* name_char = &account_name[0];
+	else if (account_choice == savings) {
+		cout << "Savings";
+	}
 
-		sql = "UPDATE Accounts set Balance = Balance + ? WHERE Name = ? ";
-
-		sqlite3_stmt* stmt;
-		sqlite3_prepare_v2(DB, sql, -1, &stmt, NULL);
-
-		sqlite3_bind_text(stmt, 1, deposit_char, strlen(deposit_char), SQLITE_STATIC);
-		sqlite3_bind_text(stmt, 2, name_char, strlen(name_char), SQLITE_STATIC);
-
-		rc = sqlite3_step(stmt);
-		sqlite3_finalize(stmt);
-		sqlite3_close(DB);
-
-		if (rc != SQLITE_DONE) {
-			cout << "Fail." << endl << endl;
-		}
-		else {
-			cout << "Success." << endl << endl;
-			return;
-		}
+	else {
+		cout << "Invalid" << endl << endl;
 	}
 }
 
@@ -122,7 +137,8 @@ void withdraw(string user) {
 	}
 }
 
-void get_balance(string user) {
+void get_balances1(string user) {
+	//TODO: Change to get username instead of name
 	sqlite3* DB;
 	int rc;
 	const char* sql;
@@ -131,7 +147,24 @@ void get_balance(string user) {
 
 	rc = sqlite3_open("Users.db", &DB);
 
-	sql = "SELECT Balance FROM Accounts WHERE Name = ? ";
+	sql = "SELECT AccountNum, Type, Balance FROM Balances WHERE Username = ? ";
+
+	sqlite3_stmt* stmt;
+	rc = sqlite3_prepare_v2(DB, sql, -1, &stmt, NULL);
+
+	sqlite3_bind_text(stmt, 1, name.c_str(), -1, SQLITE_STATIC);
+}
+
+void get_balances0(string user) {
+	sqlite3* DB;
+	int rc;
+	const char* sql;
+
+	string name = user;
+
+	rc = sqlite3_open("Users.db", &DB);
+
+	sql = "SELECT Checking, Savings FROM Accounts WHERE Name = ? ";
 
 	sqlite3_stmt* stmt;
 	rc = sqlite3_prepare_v2(DB, sql, -1, &stmt, NULL);
@@ -139,8 +172,11 @@ void get_balance(string user) {
 	sqlite3_bind_text(stmt, 1, name.c_str(), -1, SQLITE_STATIC);
 
 	if (sqlite3_step(stmt) == SQLITE_ROW) {
-		double balance = sqlite3_column_double(stmt, 0);
-		cout << "Balance: $" << balance << endl << endl;
+		double checking = sqlite3_column_double(stmt, 0);
+		double savings = sqlite3_column_double(stmt, 1);
+
+		cout << "Checking: $" << checking << endl;
+		cout << "Savings: $" << savings << endl << endl;
 	}
 	else {
 		cout << "Invalid." << endl;
@@ -150,7 +186,7 @@ void get_balance(string user) {
 	return;
 }
 
-void account_entry(string user) {
+void profile_entry(string user) {
 	string name = user;
 	string selection;
 
@@ -158,7 +194,7 @@ void account_entry(string user) {
 		cout << "--------------------" << endl << endl;
 		cout << "Welcome, " << name << endl << endl;
 
-		get_balance(name);
+		//get_balances(name);
 
 		cout << "1 - Deposit  |  2 - Withdraw  |  3 - Logout/Menu" << endl << endl;
 		cout << "Selection: ";
@@ -187,7 +223,8 @@ bool login_verify(string& username, string& password) {
 
 	rc = sqlite3_open("Users.db", &DB);
 
-	sql = "SELECT Name FROM Accounts WHERE Username = ? AND Password = ? ";
+	//sql = "SELECT Name FROM Accounts WHERE Username = ? AND Password = ? ";
+	sql = "SELECT Username FROM Accounts WHERE Username = ? AND Password = ? ";
 
 	sqlite3_stmt* stmt;
 	rc = sqlite3_prepare_v2(DB, sql, -1, &stmt, NULL);
@@ -195,17 +232,16 @@ bool login_verify(string& username, string& password) {
 	sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
 	sqlite3_bind_text(stmt, 2, password.c_str(), -1, SQLITE_STATIC);
 
+	//While loop?
 	if (sqlite3_step(stmt) == SQLITE_ROW) {
 		const unsigned char* user = sqlite3_column_text(stmt, 0);
-
-		// cout << "Login successful." << endl << endl;
 
 		string name = reinterpret_cast<const char*>(user);
 
 		sqlite3_finalize(stmt);
 		sqlite3_close(DB);
 
-		account_entry(name);
+		profile_entry(name);
 
 		return true;
 	}
@@ -234,7 +270,7 @@ void login() {
 	login_verify(username_input, password_input);
 }
 
-void create_account() {
+void create_profile() {
 	sqlite3* DB;
 	int rc;
 	const char* sql;
@@ -256,16 +292,6 @@ void create_account() {
 	cin >> password_create;
 	cout << endl;
 
-	/*for (int i = 0; i < balance_create.length(); i++) {
-		if (isalpha(balance_create[i])) {
-			cout << "Balance cannot have letters." << endl;
-			break;
-		}
-		else {
-			cout << "Good" << endl;
-		}
-	}*/
-
 	const char* name_char = &name_create[0];
 	const char* username_char = &username_create[0];
 	const char* password_char = &password_create[0];
@@ -283,17 +309,17 @@ void create_account() {
 	rc = sqlite3_step(stmt);
 
 	if (rc != SQLITE_DONE) {
-		cout << "Unable to create account. Please try again." << endl;
+		cout << "Unable to create profile. Please try again." << endl;
 	}
 	else {
-		cout << "Account created successfully." << endl;
+		cout << "Profile created successfully." << endl;
 	}
 
 	sqlite3_finalize(stmt);
 	sqlite3_close(DB);
 }
 
-void all_accounts() {
+void all_profiles() {
 	sqlite3* DB;
 	char* ErrMsg = 0;
 	int rc;
@@ -312,25 +338,25 @@ void all_accounts() {
 	sqlite3_close(DB);
 }
 
-void delete_account() {
+void delete_profile() {
 	sqlite3* DB;
 	char* ErrMsg = 0;
 	int rc;
 	const char* sql;
 	const char* data = "Callback function called.";
 	
-	string account_name;
+	string profile_name;
 
 	rc = sqlite3_open("Users.db", &DB);
 
 	cout << "--------------------" << endl << endl;
-	cout << "DELETE AN ACCOUNT" << endl << endl;
+	cout << "DELETE A PROFILE" << endl << endl;
 
-	cout << "Account Name: ";
-	cin >> account_name;
+	cout << "Profile Name: ";
+	cin >> profile_name;
 	cout << endl;
 
-	const char* delete_char = &account_name[0];
+	const char* delete_char = &profile_name[0];
 
 	sql = "DELETE FROM Accounts WHERE Name = ? ";
 
@@ -342,10 +368,10 @@ void delete_account() {
 	rc = sqlite3_step(stmt);
 
 	if (rc != SQLITE_DONE) {
-		cout << "Unable to delete account. Please try again." << endl;
+		cout << "Unable to delete profile. Please try again." << endl;
 	}
 	else {
-		cout << "Account deleted successfully." << endl;
+		cout << "Profile deleted successfully." << endl;
 	}
 
 	sqlite3_finalize(stmt);
@@ -360,7 +386,7 @@ int main() {
 
 	do {
 		cout << "Select an option from the menu below." << endl << endl;
-		cout << "1 - Login  |  2 - Create an Account  |  3 - All Users  |  4 - Delete Account  |  5 - Exit" << endl << endl;
+		cout << "1 - Login  |  2 - Create a Profile  |  3 - All Users  |  4 - Delete Profile  |  5 - Exit" << endl << endl;
 		cout << "Selection: ";
 		cin >> selection;
 		cout << endl;
@@ -370,15 +396,15 @@ int main() {
 			cout << endl;
 		}
 		else if (selection == menu_items[1]) {
-			create_account();
+			create_profile();
 			cout << endl;
 		}
 		else if (selection == menu_items[2]) {
-			all_accounts();
+			all_profiles();
 			cout << endl;
 		}
 		else if (selection == menu_items[3]) {
-			delete_account();
+			delete_profile();
 			cout << endl;
 		}
 		else if (selection == menu_items[4]) {
